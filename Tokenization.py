@@ -10,30 +10,30 @@ conversion_tokens = [
 
 
 def CppConvert(line, tokens):
-    # Convert a single line of Python code to C++ code
+
     for token in tokens:
         python_token = token['python']
         cpp_token = token['cpp']
 
-        # Regex pattern to match the Python token
+    
         pattern = re.compile(rf'{python_token}\((.*?)\)')
 
-        # Function to replace Python token with C++ token
+        
         def replace_token(match):
             content = match.group(1)
 
             parts = content.split(',')
             cpp_parts = [part.strip() for part in parts]
 
-            # Join parts with ' << ' and add a semicolon
+            
             cpp_content = ' << '.join(cpp_parts)
             return f'{cpp_token} {cpp_content};'
 
-        # Replace the token in the provided line
+        
         cpp_line = pattern.sub(replace_token, line)
         return cpp_line
 
-    # If no replacement occurs, return the original line
+
     return f"Error {line} could not be turned into C++ because of limited tokenization"
 
 

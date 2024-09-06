@@ -29,7 +29,6 @@ for i, letter in enumerate(x):
         TokenList.append(currentToken)
         currentToken = ""
 
-
 def printcpp(TokenLine):
     printstring = ""
     for token in TokenLine:

@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Removed comments cuz thats gay">
+    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Uppercased the function names">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="Changes by Slipee1e">
       <change beforePath="$PROJECT_DIR$/Tokenizationtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tokenizationtest.py" afterDir="false" />
     </list>
-    <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -167,7 +168,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725582060301</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Uppercased the function names">
+      <option name="closed" value="true" />
+      <created>1725582703203</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1725582703203</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -186,7 +195,9 @@
     <MESSAGE value="Made changes to Tokenizationtest.py" />
     <MESSAGE value="test commit" />
     <MESSAGE value="Removed comments cuz thats gay" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed comments cuz thats gay" />
+    <MESSAGE value="Uppercased the function names" />
+    <MESSAGE value="Changes by Slipee1e" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes by Slipee1e" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

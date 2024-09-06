@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Uppercased the function names">
-      <change afterPath="$PROJECT_DIR$/Tokenization.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tokenization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tokenization.py" afterDir="false" />
     </list>
     <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="Changes by Slipee1e">
       <change beforePath="$PROJECT_DIR$/Tokenizationtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tokenizationtest.py" afterDir="false" />
@@ -185,7 +185,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725583611610</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Uppercased the function names">
+      <option name="closed" value="true" />
+      <created>1725586932768</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1725586932768</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

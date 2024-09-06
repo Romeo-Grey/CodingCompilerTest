@@ -29,7 +29,8 @@ for i, letter in enumerate(x):
         TokenList.append(currentToken)
         currentToken = ""
 
-def printcpp(TokenLine):
+
+def PrintCpp(TokenLine):
     printstring = ""
     for token in TokenLine:
         if token[0] == "\"" and token[-1] == "\"":

@@ -36,7 +36,7 @@ def printcpp(TokenLine):
     printstring = ""
     for token in TokenLine:
         if token[0] == "\"" and token[-1] == "\"":
-            return f"std::cout << \"{token[1:-1]}\""
+            return f"std::cout << \"{token[1:-1]}\";"
     return f"std::cout << \"{printstring}\";"
 
 

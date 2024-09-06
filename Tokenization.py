@@ -1,6 +1,6 @@
 import re
+import argparse
 
-# List of tokens for conversion (no 'end' parameter)
 conversion_tokens = [
     {
         'python': 'print',
@@ -9,7 +9,7 @@ conversion_tokens = [
 ]
 
 
-def convert_print_statement(line, tokens):
+def CppConvert(line, tokens):
     # Convert a single line of Python code to C++ code
     for token in tokens:
         python_token = token['python']
@@ -21,13 +21,11 @@ def convert_print_statement(line, tokens):
         # Function to replace Python token with C++ token
         def replace_token(match):
             content = match.group(1)
-            # Handle quotes and escaping for C++ strings
-            content = content.replace('"', r'\"')
 
-            # If there are multiple items in the print statement, they are comma-separated
             parts = content.split(',')
             cpp_parts = [part.strip() for part in parts]
 
+            # Join parts with ' << ' and add a semicolon
             cpp_content = ' << '.join(cpp_parts)
             return f'{cpp_token} {cpp_content};'
 
@@ -36,10 +34,25 @@ def convert_print_statement(line, tokens):
         return cpp_line
 
     # If no replacement occurs, return the original line
-    return line
+    return f"Error {line} could not be turned into C++ because of limited tokenization"
 
 
-# Example usage
-python_line = 'print("Hello, world!", 42)'
-cpp_line = convert_print_statement(python_line, conversion_tokens)
-print(cpp_line)  # Output: cout << "Hello, world!" << 42;
+def convert_file(input_file, output_file, tokens):
+    with open(input_file, 'r') as infile:
+        lines = infile.readlines()
+        cpp_lines = [CppConvert(line.strip(), tokens) for line in lines]
+
+    with open(output_file, 'w') as outfile:
+        outfile.write("#include <iostream>\nusing namespace std;\n\nint main() {\n")
+        outfile.write('\n'.join(cpp_lines))
+        outfile.write('\n}\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file', type=str)
+    parser.add_argument('output_file', type=str)
+    args = parser.parse_args()
+    convert_file(args.input_file, args.output_file, conversion_tokens)
+    if __name__ == '__main__':
+        main()

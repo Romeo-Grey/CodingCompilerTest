@@ -39,7 +39,7 @@ def printcpp(TokenLine):
 
 def PyToCPP(TokenLine):
     if TokenLine[0] == "print":
-        print(printcpp(TokenLine))
+        print(PrintCpp(TokenLine))
 
     return 0
 

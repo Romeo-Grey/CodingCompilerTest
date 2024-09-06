@@ -6,8 +6,6 @@ tokens = [
     ")"
 ]
 
-
-
 TokenList = []
 inside_string = False
 
@@ -32,7 +30,7 @@ for i, letter in enumerate(x):
         currentToken = ""
 
 
-def printcpp(TokenLine):  # Turn python print function into c++ format.
+def printcpp(TokenLine):
     printstring = ""
     for token in TokenLine:
         if token[0] == "\"" and token[-1] == "\"":

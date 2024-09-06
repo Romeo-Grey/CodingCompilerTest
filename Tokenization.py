@@ -48,7 +48,7 @@ def main():
     parser.add_argument('output_file', type=str)
     args = parser.parse_args()
 
-    convert_file("PythonFileToConvert.py", "CPPFile.cpp", conversion_tokens)
+    convert_file(args.input_file, args.output_file, conversion_tokens)
 
 
 if __name__ == '__main__':

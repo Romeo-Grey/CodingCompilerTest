@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Uppercased the function names">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Added Tokenization.py and added code for it.">
       <change beforePath="$PROJECT_DIR$/Tokenization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tokenization.py" afterDir="false" />
     </list>
     <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="Changes by Slipee1e">
@@ -35,18 +34,18 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Romeo-Grey"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Romeo-Grey&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Romeo-Grey/CodingCompilerTest.git",
-    "accountId": "e05bef01-a0c3-4dbc-a96e-43832e917639"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Romeo-Grey/CodingCompilerTest.git&quot;,
+    &quot;accountId&quot;: &quot;e05bef01-a0c3-4dbc-a96e-43832e917639&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -58,6 +57,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.Tokenization.executor": "Run",
     "Python.Tokenizationtest.executor": "Run",
     "RunOnceActivity.CodyAccountHistoryMigration": "true",
     "RunOnceActivity.CodyConvertUrlToCodebaseName": "true",
@@ -193,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725586932768</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Added Tokenization.py and added code for it.">
+      <option name="closed" value="true" />
+      <created>1725594397331</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1725594397331</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -214,7 +222,8 @@
     <MESSAGE value="Removed comments cuz thats gay" />
     <MESSAGE value="Changes by Slipee1e" />
     <MESSAGE value="Uppercased the function names" />
-    <option name="LAST_COMMIT_MESSAGE" value="Uppercased the function names" />
+    <MESSAGE value="Added Tokenization.py and added code for it." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Tokenization.py and added code for it." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

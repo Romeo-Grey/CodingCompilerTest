@@ -47,7 +47,6 @@ def convert_file(input_file, output_file, tokens):
         outfile.write('\n'.join(cpp_lines))
         outfile.write('\n}\n')
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=str)

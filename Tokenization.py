@@ -43,7 +43,6 @@ def convert_file(input_file, output_file, tokens):
 
 def main():
     parser = argparse.ArgumentParser()
-    # Uncomment the following lines to use command-line arguments
     parser.add_argument('input_file', type=str)
     parser.add_argument('output_file', type=str)
     args = parser.parse_args()

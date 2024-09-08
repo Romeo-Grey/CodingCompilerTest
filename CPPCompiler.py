@@ -1,8 +1,16 @@
 import re
 from collections import namedtuple
 
+
 # Define a Token class to represent a token
-Token = namedtuple('Token', ['type', 'value', 'position'])
+class Token:
+    def __init__(self, token_type, value, position):
+        self.type = token_type
+        self.value = value
+        self.position = position
+
+    def __repr__(self):
+        return f"Token(type='{self.type}', value={self.value!r}, position={self.position})"
 
 
 # Define node classes for the AST
@@ -12,6 +20,11 @@ class NumberNode:
 
     def __repr__(self):
         return f"NumberNode({self.value})"
+
+
+class PrintNode:
+    def __init__(self, expression):
+        self.expression = expression
 
 
 class VariableNode:
@@ -63,6 +76,8 @@ class AssignmentNode:
 TOKEN_SPECIFICATION = [
     ('NUMBER', r'\d+(\.\d*)?'),  # Integer or decimal number
     ('STRING', r'\".*?\"|\'.*?\''),
+    ('PRINT', r'print'),
+    ('KEYWORD', r'if|else|then'),
     ('CMP', r'==|!=|<=|>=|<|>'),  # Comparison operators
     ('ASSIGN', r'='),  # Assignment operator
     ('END', r';'),  # Statement terminator
@@ -161,62 +176,55 @@ class Parser:
         return statements
 
     def statement(self):
-        """Parse a statement."""
         if self.current_token and self.current_token.type == 'ID':
             var_name = self.current_token.value
-            self.advance()  # Move past variable ID
-
+            self.advance()
             if self.current_token and self.current_token.type == 'ASSIGN':
-                self.advance()  # Move past '='
+                self.advance()
                 expr = self.expression()
-                if self.current_token and self.current_token.type == 'END':
-                    self.advance()  # Move past ';'
                 return AssignmentNode(var_name, expr)
             else:
-                # If not an assignment, it might be an expression or an error
                 return VariableNode(var_name)
-
-        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'if':
+        elif self.current_token and self.current_token.type == 'PRINT':
+            return self.print_statement()
+        elif self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'if':
             return self.if_statement()
-
-        # If no specific statement type matched, handle expressions directly
         return self.expression()
 
+    def print_statement(self):
+        self.expect('PRINT')
+        expr = self.expression()
+        return PrintNode(expr)
+
+    def generate_print(self, node):
+        value = self.generate(node.expression)
+        print(f"Debug: Generating PRINT instruction for {value}")
+        self.instructions.append(f"PRINT {value}")
+
     def if_statement(self):
-        """Parse an if statement like `if x == 10: ... else: ...`."""
         self.expect('KEYWORD')  # Expect 'if'
-
-        # Parse the condition
         condition = self.condition()
-
-        self.expect('COLON')  # Expect ':'
-
-        # Parse the true branch
+        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'then':
+            self.advance()  # Skip 'then' keyword
         true_branch = self.block()
-
-        # Optionally parse an else block
         false_branch = None
         if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'else':
-            self.expect('KEYWORD')  # Expect 'else'
-            self.expect('COLON')  # Expect ':'
-            false_branch = self.block()  # Parse the false branch
-
+            self.advance()  # Skip 'else' keyword
+            false_branch = self.block()
         return IfNode(condition, true_branch, false_branch)
 
     def condition(self):
-        """Parse a condition (e.g., `x == 10`)."""
+        """Parse a condition (e.g., `x == 10` or just `x`)."""
         left = self.expression()
 
-        # Check for comparison operator
-        if self.current_token.type == 'CMP':
+        if self.current_token and self.current_token.type == 'CMP':
             op = self.current_token.value
-            self.advance()
+            self.advance()  # Move past the comparison operator
+            right = self.expression()
+            return BinOpNode(left, op, right)
         else:
-            raise SyntaxError(
-                f"Expected comparison operator, got {self.current_token.type if self.current_token else 'EOF'}")
-
-        right = self.expression()
-        return BinOpNode(left, op, right)
+            # If there's no comparison operator, return the expression as is
+            return left
 
     def block(self):
         """Parse a block of statements."""
@@ -233,12 +241,11 @@ class Parser:
         """Parse an expression."""
         node = self.term()
 
-        # Handle binary operations (e.g., +, -, *, /)
         while self.current_token and self.current_token.type in {'OP', 'CMP'}:
             op = self.current_token.value
-            self.advance()  # Move past the operator
-            right = self.term()  # Parse the right-hand side
-            node = BinOpNode(node, op, right)  # Construct a binary operation node
+            self.advance()
+            right = self.term()
+            node = BinOpNode(node, op, right)
 
         return node
 
@@ -269,39 +276,40 @@ class Parser:
             self.advance()
             return NumberNode(token.value)
         elif token.type == 'ID':
-            # Check for assignment after variable
             var_name = token.value
-            self.advance()  # Move past the variable ID
+            self.advance()
             if self.current_token and self.current_token.type == 'ASSIGN':
-                self.advance()  # Move past '='
-                value = self.expression()  # Get the value being assigned
-                return AssignmentNode(var_name, value)  # Return an assignment node
+                self.advance()
+                value = self.expression()
+                return AssignmentNode(var_name, value)
             else:
-                return VariableNode(var_name)  # If no assignment, it's just a variable
+                return VariableNode(var_name)
         elif token.type == 'STRING':
             self.advance()
             return StringNode(token.value)
         elif token.type == 'PAREN' and token.value == '(':
             self.advance()
             expr = self.expression()
-            self.expect('PAREN')  # Expect ')'
+            self.expect('PAREN')
             return expr
-        elif token.type == 'LOGICAL':  # Handling logical operators like "and", "or", "not"
+        elif token.type == 'LOGICAL':
+            return self.logical_expression()
+        elif token.type == 'CMP':
+            return self.comparison_expression()
+        elif token.type == 'BRACKET' and token.value == '[':
             self.advance()
-            return self.logical_expression()  # Assuming there's a method for logical expressions
-        elif token.type == 'CMP':  # Handling comparison operators like '==', '!=', etc.
-            self.advance()
-            return self.comparison_expression()  # Assuming a method for comparisons
-        elif token.type == 'BRACKET' and token.value == '[':  # Handle array or list access
-            self.advance()
-            expr = self.expression()  # Parse expression within brackets
-            self.expect('BRACKET')  # Expect closing ']'
+            expr = self.expression()
+            self.expect('BRACKET')
             return expr
-        elif token.type == 'BRACE' and token.value == '{':  # Handle block or dictionary-like structures
+        elif token.type == 'BRACE' and token.value == '{':
             self.advance()
-            statements = self.block()  # Parse block inside braces
-            self.expect('BRACE')  # Expect closing '}'
+            statements = self.block()
+            self.expect('BRACE')
             return statements
+        elif token.type == 'KEYWORD' and token.value == 'else':
+            # Ignore 'else' keyword when encountered here
+            self.advance()
+            return None
         else:
             raise SyntaxError(f"Unexpected token in term: {token}")
 
@@ -446,90 +454,86 @@ class SemanticAnalyzer:
 class IntermediateCodeGenerator:
     def __init__(self):
         self.temp_count = 0
+        self.label_count = 0
         self.instructions = []
 
     def new_temp(self):
-        """Generate a new temporary variable name."""
         self.temp_count += 1
         return f"T{self.temp_count}"
 
+    def new_label(self):
+        self.label_count += 1
+        return f"L{self.label_count}"
+
     def generate(self, node):
-        """Generate intermediate code for the given AST node."""
-        if isinstance(node, ProgramNode):
+        if isinstance(node, list):
+            for stmt in node:
+                self.generate(stmt)
+        elif isinstance(node, ProgramNode):
             for stmt in node.statements:
                 self.generate(stmt)
         elif isinstance(node, AssignmentNode):
             self.generate_assignment(node)
         elif isinstance(node, BinOpNode):
-            self.generate_binop(node)
+            return self.generate_binop(node)
         elif isinstance(node, NumberNode):
-            pass  # Numbers are handled directly in operations
+            return str(node.value)
+        elif isinstance(node, PrintNode):
+            self.generate_print(node)
+        elif isinstance(node, IfNode):
+            self.generate_if(node)
         elif isinstance(node, VariableNode):
-            pass  # Variables are used directly in operations
+            return node.name
         else:
             raise Exception(f"Unknown node type: {type(node)}")
 
     def generate_assignment(self, node):
-        """Generate intermediate code for an assignment."""
-        var_name = node.variable  # Assume variable is a string
-        expr = node.value
-
-        # Check if the expression is a NumberNode or Binary Operation
-        if isinstance(expr, NumberNode):
-            self.instructions.append(f"STORE NUM_{expr.value} {var_name}")
-        elif isinstance(expr, BinOpNode):
-            # Generate intermediate code for the expression
-            temp_result = self.generate_binop(expr)
-            self.instructions.append(f"STORE {temp_result} {var_name}")
-        else:
-            temp_result = self.new_temp()
-            self.generate(expr)
-            self.instructions.append(f"STORE {temp_result} {var_name}")
+        value = self.generate(node.value)
+        self.instructions.append(f"STORE {value} {node.variable}")
 
     def generate_binop(self, node):
-        """Generate intermediate code for a binary operation."""
-        left = node.left
-        right = node.right
-        op = node.op
+        left = self.generate(node.left)
+        right = self.generate(node.right)
+        result = self.new_temp()
+        self.instructions.append(f"{node.op} {left} {right} {result}")
+        return result
 
-        # Create temporary variables for the operands
-        temp1 = self.get_temp_var_for_value(left)
-        temp2 = self.get_temp_var_for_value(right)
-        result_temp = self.new_temp()
+    def generate_print(self, node):
+        value = self.generate(node.expression)
+        self.instructions.append(f"PRINT {value}")
 
-        # Load left operand into a temporary variable
-        if isinstance(left, VariableNode):
-            self.instructions.append(f"LOAD {left.name} {temp1}")
-        elif isinstance(left, NumberNode):
-            self.instructions.append(f"LOAD NUM_{left.value} {temp1}")
+    def generate_if(self, node):
+        condition = self.generate(node.condition)
+        true_label = self.new_label()
+        false_label = self.new_label()
+        end_label = self.new_label()
 
-        # Load right operand into a temporary variable
-        if isinstance(right, VariableNode):
-            self.instructions.append(f"LOAD {right.name} {temp2}")
-        elif isinstance(right, NumberNode):
-            self.instructions.append(f"LOAD NUM_{right.value} {temp2}")
+        self.instructions.append(f"IF {condition} GOTO {true_label}")
+        self.instructions.append(f"GOTO {false_label}")
 
-        # Generate code for the binary operation
-        self.instructions.append(f"{op} {temp1} {temp2} {result_temp}")
+        self.instructions.append(f"{true_label}:")
+        self.generate(node.true_branch)
+        self.instructions.append(f"GOTO {end_label}")
 
-        return result_temp  # Return the result temporary variable
+        self.instructions.append(f"{false_label}:")
+        if node.false_branch:
+            self.generate(node.false_branch)
 
-    def get_temp_var_for_value(self, value_node):
-        """Generate a temporary variable for a value node."""
-        if isinstance(value_node, NumberNode):
-            return self.new_temp()
-        elif isinstance(value_node, VariableNode):
-            return self.new_temp()
-        raise Exception("Invalid node for temporary variable")
+        self.instructions.append(f"{end_label}:")
 
     def get_code(self):
-        """Return the generated intermediate code."""
         return "\n".join(self.instructions)
 
 
 code = """
 x = 5
 y = x + 10
+print y
+if x < 10 then
+    print x
+else
+    print y
+
 """
 
 # Step 1: Tokenize the input code

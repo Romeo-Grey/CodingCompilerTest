@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Fixed Problems with Tokenization and added an AST to the program.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CPPCompiler.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPPCompiler.py" afterDir="false" />
-    </list>
+    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Added SemanticAnalyzer and IntermediateCodeGenerator to file." />
     <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="Changes by Slipee1e" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -308,7 +305,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725762106667</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Added SemanticAnalyzer and IntermediateCodeGenerator to file.">
+      <option name="closed" value="true" />
+      <created>1725765622117</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1725765622117</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -339,7 +344,8 @@
     <MESSAGE value="Added a main file for processing all the code" />
     <MESSAGE value="Added new functionalities to parser" />
     <MESSAGE value="Fixed Problems with Tokenization and added an AST to the program." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed Problems with Tokenization and added an AST to the program." />
+    <MESSAGE value="Added SemanticAnalyzer and IntermediateCodeGenerator to file." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added SemanticAnalyzer and IntermediateCodeGenerator to file." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

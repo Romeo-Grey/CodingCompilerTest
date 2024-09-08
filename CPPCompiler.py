@@ -52,7 +52,7 @@ class IfNode:
 
 class AssignmentNode:
     def __init__(self, variable, value):
-        self.variable = variable
+        self.variable = variable  # This should be a VariableNode object
         self.value = value
 
     def __repr__(self):
@@ -471,15 +471,20 @@ class IntermediateCodeGenerator:
 
     def generate_assignment(self, node):
         """Generate intermediate code for an assignment."""
-        var_name = node.variable
+        var_name = node.variable  # Assume variable is a string
         expr = node.value
-        temp = self.new_temp()  # Create a temporary variable for the result
 
-        # Generate intermediate code for the expression
-        self.generate(expr)
-
-        # Store the result of the expression into the variable
-        self.instructions.append(f"STORE {temp} {var_name}")
+        # Check if the expression is a NumberNode or Binary Operation
+        if isinstance(expr, NumberNode):
+            self.instructions.append(f"STORE NUM_{expr.value} {var_name}")
+        elif isinstance(expr, BinOpNode):
+            # Generate intermediate code for the expression
+            temp_result = self.generate_binop(expr)
+            self.instructions.append(f"STORE {temp_result} {var_name}")
+        else:
+            temp_result = self.new_temp()
+            self.generate(expr)
+            self.instructions.append(f"STORE {temp_result} {var_name}")
 
     def generate_binop(self, node):
         """Generate intermediate code for a binary operation."""
@@ -487,78 +492,66 @@ class IntermediateCodeGenerator:
         right = node.right
         op = node.op
 
-        # Create temporary variables for the operands and result
-        temp1 = self.new_temp()
-        temp2 = self.new_temp()
+        # Create temporary variables for the operands
+        temp1 = self.get_temp_var_for_value(left)
+        temp2 = self.get_temp_var_for_value(right)
         result_temp = self.new_temp()
 
-        # Generate code for the left operand
-        self.generate(left)
-        self.instructions.append(f"LOAD {left} {temp1}")
+        # Load left operand into a temporary variable
+        if isinstance(left, VariableNode):
+            self.instructions.append(f"LOAD {left.name} {temp1}")
+        elif isinstance(left, NumberNode):
+            self.instructions.append(f"LOAD NUM_{left.value} {temp1}")
 
-        # Generate code for the right operand
-        self.generate(right)
-        self.instructions.append(f"LOAD {right} {temp2}")
+        # Load right operand into a temporary variable
+        if isinstance(right, VariableNode):
+            self.instructions.append(f"LOAD {right.name} {temp2}")
+        elif isinstance(right, NumberNode):
+            self.instructions.append(f"LOAD NUM_{right.value} {temp2}")
 
         # Generate code for the binary operation
         self.instructions.append(f"{op} {temp1} {temp2} {result_temp}")
 
-        # Store the result in a temporary variable
-        self.instructions.append(f"STORE {result_temp} {result_temp}")
+        return result_temp  # Return the result temporary variable
 
     def get_temp_var_for_value(self, value_node):
         """Generate a temporary variable for a value node."""
         if isinstance(value_node, NumberNode):
-            return f"NUM_{value_node.value}"
+            return self.new_temp()
         elif isinstance(value_node, VariableNode):
-            return f"VAR_{value_node.name}"
+            return self.new_temp()
         raise Exception("Invalid node for temporary variable")
-
-    def generate_temp_var(self):
-        """Generate a new temporary variable name."""
-        self.temp_count += 1
-        return f"T{self.temp_count}"
 
     def get_code(self):
         """Return the generated intermediate code."""
         return "\n".join(self.instructions)
 
 
-# Example usage
-ir_gen = IntermediateCodeGenerator()
-# Assuming `ast` is the Abstract Syntax Tree generated from the parser
-ast = [
-    AssignmentNode("x", NumberNode(5)),
-    AssignmentNode("y", BinOpNode(VariableNode("x"), "+", NumberNode(10)))
-]
-
-# Generate intermediate code
-for node in ast:
-    ir_gen.generate(node)
-
-# Print intermediate code
-print("\nIntermediate Code:")
-print(ir_gen.get_code())
-
-# Example code to tokenize, parse, and analyze
-# Tokenize the input code
 code = """
 x = 5
 y = x + 10
-
 """
 
-tokens = tokenize(code)  # Step 1: Tokenization
-parser = Parser(tokens)  # Step 2: Parsing
-ast = parser.parse()  # This generates the AST
+# Step 1: Tokenize the input code
+tokens = tokenize(code)
 
-# Print the AST for debugging
+# Check if tokens are generated correctly
+print("Tokens:", tokens)
+
+# Step 2: Parse the tokens into an AST
+parser = Parser(tokens)  # Ensure your Parser class is defined and works with tokens
+ast = parser.parse()  # This should return the AST, which is stored in `ast`
+
+# Check if the AST is generated correctly
 print("\nGenerated AST:")
 for node in ast:
     print(node)
 
-# Step 3: Run semantic analysis on the generated AST
-semantic_analyzer = SemanticAnalyzer()
-print("\nRunning semantic analysis...")
+# Step 3: Generate intermediate code from the AST
+ir_gen = IntermediateCodeGenerator()
 for node in ast:
-    semantic_analyzer.analyze(node)
+    ir_gen.generate(node)
+
+# Step 4: Print the intermediate code
+print("\nIntermediate Code:")
+print(ir_gen.get_code())

@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Added new functionalities to parser">
-      <change beforePath="$PROJECT_DIR$/.idea/cody_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cody_history.xml" afterDir="false" />
+    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Fixed Problems with Tokenization and added an AST to the program.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CPPCompiler.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPPCompiler.py" afterDir="false" />
     </list>
@@ -301,7 +300,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725749633396</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Fixed Problems with Tokenization and added an AST to the program.">
+      <option name="closed" value="true" />
+      <created>1725762106667</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1725762106667</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -331,7 +338,8 @@
     <MESSAGE value="Added Comments" />
     <MESSAGE value="Added a main file for processing all the code" />
     <MESSAGE value="Added new functionalities to parser" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added new functionalities to parser" />
+    <MESSAGE value="Fixed Problems with Tokenization and added an AST to the program." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed Problems with Tokenization and added an AST to the program." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

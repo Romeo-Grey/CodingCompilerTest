@@ -62,12 +62,12 @@ class AssignmentNode:
 # Token specifications using regular expressions
 TOKEN_SPECIFICATION = [
     ('NUMBER', r'\d+(\.\d*)?'),  # Integer or decimal number
-    ('STRING', r'\".*?\"|\'.*?\''),  # String literals
+    ('STRING', r'\".*?\"|\'.*?\''),
+    ('CMP', r'==|!=|<=|>=|<|>'),  # Comparison operators
     ('ASSIGN', r'='),  # Assignment operator
     ('END', r';'),  # Statement terminator
-    ('ID', r'[A-Za-z_]\w*'),  # Identifiers (variables, functions)
+    ('ID', r'[A-Za-z_]\w*'),  # Identifiers
     ('OP', r'[+\-*/%]'),  # Arithmetic operators
-    ('CMP', r'==|!=|<=|>=|<|>'),  # Comparison operators
     ('LOGICAL', r'and|or|not'),  # Logical operators
     ('PAREN', r'[\(\)]'),  # Parentheses
     ('BRACE', r'[\{\}]'),  # Braces
@@ -88,7 +88,6 @@ token_regex = '|'.join(f'(?P<{pair[0]}>{pair[1]})' for pair in TOKEN_SPECIFICATI
 def tokenize(code):
     tokens = []
     position = 0
-
     for match in re.finditer(token_regex, code):
         token_type = match.lastgroup
         token_value = match.group(token_type)
@@ -108,7 +107,10 @@ def tokenize(code):
         tokens.append(Token(token_type, token_value, position))
 
         # Update position correctly
-        position += len(token_value)
+        position += len(str(token_value))
+
+    # Print tokens for debugging
+    print("Tokens:", tokens)
 
     return tokens
 
@@ -143,43 +145,55 @@ class Parser:
         """Parse a sequence of statements."""
         statements = []
         while self.current_token:
-            if self.current_token.type == 'KEYWORD' and self.current_token.value == 'if':
-                statements.append(self.if_statement())
-            else:
-                stmt = self.statement()
-                if stmt:
-                    statements.append(stmt)
-            # Handle new lines between statements
+            stmt = self.statement()
+            if stmt:
+                statements.append(stmt)
             while self.current_token and self.current_token.type == 'NEWLINE':
                 self.advance()
         return statements
 
     def statement(self):
-        """Parse a statement. Here, we'll handle basic assignments and expressions."""
-        if self.current_token and self.current_token.type == 'ID' and self.tokens[self.index + 1].type == 'ASSIGN':
+        """Parse a statement."""
+        if self.current_token and self.current_token.type == 'ID':
             var_name = self.current_token.value
-            self.advance()  # Move past the variable name
-            self.expect('ASSIGN')  # Expect '='
-            expr = self.expression()
-            self.expect('END')  # Expect ';'
-            return AssignmentNode(var_name, expr)
-        elif self.current_token and self.current_token.type == 'KEYWORD':
-            # Add handling for other keywords if necessary
-            raise SyntaxError(f"Unexpected keyword: {self.current_token.value}")
-        else:
-            return self.expression()
+            self.advance()  # Move past variable ID
+
+            if self.current_token and self.current_token.type == 'ASSIGN':
+                self.advance()  # Move past '='
+                expr = self.expression()
+                if self.current_token and self.current_token.type == 'NEWLINE':
+                    self.advance()  # Move past '\n'
+                return AssignmentNode(var_name, expr)
+            else:
+                # If not an assignment, it might be an expression or an error
+                return VariableNode(var_name)
+
+        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'if':
+            return self.if_statement()
+
+        # If no specific statement type matched, handle expressions directly
+        return self.expression()
 
     def if_statement(self):
         """Parse an if statement like `if x == 10: ... else: ...`."""
         self.expect('KEYWORD')  # Expect 'if'
 
-        # Parse the condition, which is an expression
-        condition = self.expression()
+        # Parse the condition
+        left = self.expression()
 
-        # After the condition, we expect a colon, not an assignment
+        # Check for comparison operator
+        if self.current_token.type == 'CMP':
+            op = self.current_token.value
+            self.advance()
+        else:
+            raise SyntaxError(f"Expected comparison operator, got {self.current_token.type}")
+
+        right = self.expression()
+        condition = BinOpNode(left, op, right)
+
         self.expect('COLON')  # Expect ':'
 
-        # Parse the true branch (statements inside the block)
+        # Parse the true branch
         true_branch = self.block()
 
         # Optionally parse an else block
@@ -194,11 +208,10 @@ class Parser:
     def block(self):
         """Parse a block of statements."""
         statements = []
-        while self.current_token and self.current_token.type not in {'KEYWORD', 'NEWLINE'}:
+        while self.current_token and self.current_token.type not in {'KEYWORD', 'NEWLINE', 'END'}:
             stmt = self.statement()
             if stmt:
                 statements.append(stmt)
-            # Skip any new lines between statements
             while self.current_token and self.current_token.type == 'NEWLINE':
                 self.advance()
         return statements
@@ -207,21 +220,22 @@ class Parser:
         """Parse an expression."""
         node = self.term()
 
-        # Handle comparison operators (==, !=, <=, >=, <, >)
-        while self.current_token and self.current_token.type == 'CMP':
+        # Handle binary operations (e.g., +, -, *, /)
+        while self.current_token and self.current_token.type in {'OP', 'CMP'}:
             op = self.current_token.value
-            self.advance()  # Move past the comparison operator
-            right = self.term()  # Parse the right-hand side of the comparison
+            self.advance()  # Move past the operator
+            right = self.term()  # Parse the right-hand side
             node = BinOpNode(node, op, right)  # Construct a binary operation node
 
         return node
 
     def term(self):
-        """Parse a term (numbers and variables)."""
+        """Parse a term (numbers, variables, and strings)."""
         while self.current_token and self.current_token.type == 'NEWLINE':
             self.advance()
 
         token = self.current_token
+
         if token.type == 'NUMBER':
             self.advance()
             return NumberNode(token.value)
@@ -237,15 +251,17 @@ class Parser:
             self.expect('PAREN')  # Expect ')'
             return expr
         else:
-            raise SyntaxError(f"Unexpected token: {token}")
+            raise SyntaxError(f"Unexpected token in term: {token}")
 
 
 # Example code to tokenize and parse
 code = """
-if x == 10:
-    y = "Hello";
+x = 5
+y = 10
+if x == y:
+    z = x + y
 else:
-    y = 'World';
+    z = x - y
 """
 
 tokens = tokenize(code)

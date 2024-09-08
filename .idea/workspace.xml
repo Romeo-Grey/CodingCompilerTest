@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Changes to workspace.xml">
+    <list default="true" id="ae4dabfa-00a9-4555-95ca-0290cec23bb8" name="Changes" comment="Added new functionalities to parser">
+      <change beforePath="$PROJECT_DIR$/.idea/cody_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cody_history.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CPPFile.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CPPFile.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PythonFileToConvert.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonFileToConvert.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tokenization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tokenization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPPCompiler.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPPCompiler.py" afterDir="false" />
     </list>
     <list id="2abe097d-f5b5-486a-978b-0f0a030d550d" name="Changes by Slipee1e" comment="Changes by Slipee1e" />
     <option name="SHOW_DIALOG" value="false" />
@@ -63,24 +62,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.Tokenization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Tokenizationtest.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.CodyAccountHistoryMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyConvertUrlToCodebaseName&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyHistoryLlmMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyProjectSettingsMigration&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.CommitDialog&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.CPPCompiler.executor": "Run",
+    "Python.Tokenization.executor": "Run",
+    "Python.Tokenizationtest.executor": "Run",
+    "RunOnceActivity.CodyAccountHistoryMigration": "true",
+    "RunOnceActivity.CodyAccountsIdsRefresh": "true",
+    "RunOnceActivity.CodyAssignOrphanedChatsToActiveAccount": "true",
+    "RunOnceActivity.CodyConvertUrlToCodebaseName": "true",
+    "RunOnceActivity.CodyHistoryLlmMigration": "true",
+    "RunOnceActivity.CodyMigrateChatHistory-v2": "true",
+    "RunOnceActivity.CodyProjectSettingsMigration": "true",
+    "RunOnceActivity.ToggleCodyToolWindowAfterMigration": "true",
+    "git-widget-placeholder": "main",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;ChangesTree.GroupingKeys&quot;: [
-      &quot;directory&quot;,
-      &quot;repository&quot;
+  "keyToStringList": {
+    "ChangesTree.GroupingKeys": [
+      "directory",
+      "repository"
     ]
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -273,7 +277,31 @@
       <option name="project" value="LOCAL" />
       <updated>1725667236481</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Added Comments">
+      <option name="closed" value="true" />
+      <created>1725726453029</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1725726453029</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Added a main file for processing all the code">
+      <option name="closed" value="true" />
+      <created>1725746412081</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1725746412081</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Added new functionalities to parser">
+      <option name="closed" value="true" />
+      <created>1725749633396</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1725749633396</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -300,7 +328,10 @@
     <MESSAGE value="Added parser args to the program" />
     <MESSAGE value="Removed unnecessary comment." />
     <MESSAGE value="Changes to workspace.xml" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changes to workspace.xml" />
+    <MESSAGE value="Added Comments" />
+    <MESSAGE value="Added a main file for processing all the code" />
+    <MESSAGE value="Added new functionalities to parser" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added new functionalities to parser" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

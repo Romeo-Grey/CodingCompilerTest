@@ -98,7 +98,7 @@ TOKEN_SPECIFICATION = [
     ('NUMBER', r'\d+(\.\d*)?'),  # Integer or decimal number
     ('STRING', r'\".*?\"|\'.*?\''),
     ('PRINT', r'print'),
-    ('KEYWORD', r'if|else|then'),
+    ('KEYWORD', r'if|else|then|while|for'),  # Keywords
     ('CMP', r'==|!=|<=|>=|<|>'),  # Comparison operators
     ('ASSIGN', r'='),  # Assignment operator
     ('END', r';'),  # Statement terminator
@@ -183,20 +183,25 @@ class Parser:
 
     def parse(self):
         """Parse the tokens into an AST."""
+        print("Starting parsing process")
         return self.program()
 
     def program(self):
         """Parse a sequence of statements."""
+        print("Parsing program")
         statements = []
         while self.current_token:
+            print(f"Current token: {self.current_token}")
             stmt = self.statement()
             if stmt:
                 statements.append(stmt)
+                print(f"Added statement: {stmt}")
             while self.current_token and self.current_token.type == 'NEWLINE':
                 self.advance()
         return statements
 
     def statement(self):
+        print(f"Parsing statement, current token: {self.current_token}")
         if self.current_token and self.current_token.type == 'ID':
             var_name = self.current_token.value
             self.advance()
@@ -208,8 +213,16 @@ class Parser:
                 return VariableNode(var_name)
         elif self.current_token and self.current_token.type == 'PRINT':
             return self.print_statement()
-        elif self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'if':
-            return self.if_statement()
+        elif self.current_token and self.current_token.type == 'KEYWORD':
+            if self.current_token.value == 'if':
+                print("Entering if_statement")
+                return self.if_statement()
+            elif self.current_token.value == 'while':
+                print("Entering while_statement")
+                return self.while_statement()
+            elif self.current_token.value == 'for':
+                print("Entering for_statement")
+                return self.for_statement()
         return self.expression()
 
     def print_statement(self):
@@ -217,45 +230,63 @@ class Parser:
         expr = self.expression()
         return PrintNode(expr)
 
-    def generate_print(self, node):
-        value = self.generate(node.expression)
-        print(f"Debug: Generating PRINT instruction for {value}")
-        self.instructions.append(f"PRINT {value}")
+    def while_statement(self):
+        print("Parsing while statement")
+        self.expect('KEYWORD')  # Expect 'while'
+        condition = self.condition()
+        print(f"While condition: {condition}")
+        body = self.block()
+        print(f"While body: {body}")
+        return WhileNode(condition, body)
+
+    def for_statement(self):
+        print("Parsing for statement")
+        self.expect('KEYWORD')  # Expect 'for'
+        self.expect('PAREN')  # Expect '('
+        init = self.statement()
+        print(f"For init: {init}")
+        self.expect('END')  # Expect ';'
+        condition = self.condition()
+        print(f"For condition: {condition}")
+        self.expect('END')  # Expect ';'
+        update = self.statement()
+        print(f"For update: {update}")
+        self.expect('PAREN')  # Expect ')'
+        body = self.block()
+        print(f"For body: {body}")
+        return ForNode(init, condition, update, body)
 
     def if_statement(self):
+        print("Parsing if statement")
         self.expect('KEYWORD')  # Expect 'if'
         condition = self.condition()
+        print(f"If condition: {condition}")
         if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'then':
             self.advance()  # Skip 'then' keyword
         true_branch = self.block()
+        print(f"If true branch: {true_branch}")
         false_branch = None
         if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'else':
             self.advance()  # Skip 'else' keyword
             false_branch = self.block()
+            print(f"If false branch: {false_branch}")
         return IfNode(condition, true_branch, false_branch)
 
     def condition(self):
-        """Parse a condition (e.g., `x == 10` or just `x`)."""
         left = self.expression()
-
         if self.current_token and self.current_token.type == 'CMP':
             op = self.current_token.value
-            self.advance()  # Move past the comparison operator
+            self.advance()
             right = self.expression()
             return BinOpNode(left, op, right)
-        else:
-            # If there's no comparison operator, return the expression as is
-            return left
+        return left
 
     def block(self):
-        """Parse a block of statements."""
         statements = []
-        while self.current_token and self.current_token.type not in {'KEYWORD', 'NEWLINE', 'END'}:
+        while self.current_token and self.current_token.type not in {'KEYWORD', 'END'}:
             stmt = self.statement()
             if stmt:
                 statements.append(stmt)
-            while self.current_token and self.current_token.type == 'NEWLINE':
-                self.advance()
         return statements
 
     def expression(self):
@@ -288,7 +319,7 @@ class Parser:
 
     def term(self):
         """Parse a term (numbers, variables, and strings)."""
-        while self.current_token and self.current_token.type == 'NEWLINE':
+        while self.current_token and self.current_token.type == 'NEWLINE' or self.current_token and self.current_token.type == 'COMMENT':
             self.advance()
 
         token = self.current_token
@@ -327,10 +358,17 @@ class Parser:
             statements = self.block()
             self.expect('BRACE')
             return statements
-        elif token.type == 'KEYWORD' and token.value == 'else':
-            # Ignore 'else' keyword when encountered here
-            self.advance()
-            return None
+        elif token.type == 'KEYWORD':
+            if token.value == 'while':
+                return self.while_statement()
+            elif token.value == 'for':
+                return self.for_statement()
+            elif token.value == 'if':
+                return self.if_statement()
+            elif token.value == 'else':
+                # Ignore 'else' keyword when encountered here
+                self.advance()
+                return None
         else:
             raise SyntaxError(f"Unexpected token in term: {token}")
 
@@ -520,6 +558,10 @@ class IntermediateCodeGenerator:
             self.generate_if(node)
         elif isinstance(node, VariableNode):
             return node.name
+        elif isinstance(node, WhileNode):
+            self.generate_while(node)
+        elif isinstance(node, ForNode):
+            self.generate_for(node)
         else:
             raise Exception(f"Unknown node type: {type(node)}")
 
@@ -533,6 +575,34 @@ class IntermediateCodeGenerator:
         result = self.new_temp()
         self.instructions.append(f"{node.op} {left} {right} {result}")
         return result
+
+    def generate_while(self, node):
+        start_label = self.new_label()
+        end_label = self.new_label()
+
+        self.instructions.append(f"{start_label}:")
+        condition = self.generate(node.condition)
+        self.instructions.append(f"IF NOT {condition} GOTO {end_label}")
+        self.generate(node.body)
+        self.instructions.append(f"GOTO {start_label}")
+        self.instructions.append(f"{end_label}:")
+
+    def generate_for(self, node):
+        init_label = self.new_label()
+        start_label = self.new_label()
+        update_label = self.new_label()
+        end_label = self.new_label()
+
+        self.instructions.append(f"{init_label}:")
+        self.generate(node.init)
+        self.instructions.append(f"{start_label}:")
+        condition = self.generate(node.condition)
+        self.instructions.append(f"IF NOT {condition} GOTO {end_label}")
+        self.generate(node.body)
+        self.instructions.append(f"{update_label}:")
+        self.generate(node.update)
+        self.instructions.append(f"GOTO {start_label}")
+        self.instructions.append(f"{end_label}:")
 
     def generate_print(self, node):
         value = self.generate(node.expression)
@@ -563,12 +633,22 @@ class IntermediateCodeGenerator:
 
 code = """
 x = 5
-y = x + 10
-print y
-if x < 10 then
+y = 10
+
+# Test while loop
+while x < 10 then
     print x
+    x = x + 1
+
+# Test if-else
+if y > 5 then
+    print "y is greater than 5"
 else
-    print y
+    print "y is not greater than 5"
+
+# Test arithmetic
+z = x + y
+print z
 
 """
 

@@ -1,5 +1,4 @@
 import re
-from collections import namedtuple
 
 
 # Define a Token class to represent a token

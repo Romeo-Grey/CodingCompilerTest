@@ -22,6 +22,27 @@ class NumberNode:
         return f"NumberNode({self.value})"
 
 
+class WhileNode:
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+
+class ForNode:
+    def __init__(self, init, condition, update, body):
+        self.init = init
+        self.condition = condition
+        self.update = update
+        self.body = body
+
+    def __repr__(self):
+        return f"ForNode({self.init}, {self.condition}, {self.update}, {self.body})"
+
+
+def __repr__(self):
+    return f"WhileNode({self.condition}, {self.body})"
+
+
 class PrintNode:
     def __init__(self, expression):
         self.expression = expression
@@ -349,6 +370,11 @@ class SemanticAnalyzer:
             self.analyze_assignment(node)
         elif isinstance(node, BinOpNode):
             self.analyze_binop(node)
+        elif isinstance(node, WhileNode):
+            self.analyze_while(node)
+        elif isinstance(node, ForNode):
+            self.analyze_for(node)
+
         elif isinstance(node, IfNode):
             self.analyze_if(node)
         elif isinstance(node, VariableNode):
@@ -440,6 +466,16 @@ class SemanticAnalyzer:
         if node.false_branch:
             print("Analyzing false branch")
             self.analyze(node.false_branch)
+
+    def analyze_while(self, node):
+        self.analyze(node.condition)
+        self.analyze(node.body)
+
+    def analyze_for(self, node):
+        self.analyze(node.init)
+        self.analyze(node.condition)
+        self.analyze(node.update)
+        self.analyze(node.body)
 
     def analyze_variable(self, node):
         """Check that the variable is declared."""

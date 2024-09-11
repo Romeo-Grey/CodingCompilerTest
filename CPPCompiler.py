@@ -1,5 +1,4 @@
 import re
-from collections import namedtuple
 
 
 # Define a Token class to represent a token
@@ -98,7 +97,7 @@ TOKEN_SPECIFICATION = [
     ('NUMBER', r'\d+(\.\d*)?'),  # Integer or decimal number
     ('STRING', r'\".*?\"|\'.*?\''),
     ('PRINT', r'print'),
-    ('KEYWORD', r'if|else|then|while|for'),  # Keywords
+    ('KEYWORD', r'if|else|while|for'),  # Keywords
     ('CMP', r'==|!=|<=|>=|<|>'),  # Comparison operators
     ('ASSIGN', r'='),  # Assignment operator
     ('END', r';'),  # Statement terminator
@@ -175,11 +174,13 @@ class Parser:
             self.current_token = None
 
     def expect(self, token_type):
-        """Check if the current token matches the expected type."""
         if self.current_token and self.current_token.type == token_type:
+            token = self.current_token
             self.advance()
+            return token
         else:
-            raise SyntaxError(f"Expected {token_type}, got {self.current_token.type if self.current_token else 'EOF'}")
+            raise SyntaxError(
+                f"Expected {token_type}, got {self.current_token.type if self.current_token else 'EOF'} at position {self.current_token.position if self.current_token else 'unknown'}")
 
     def parse(self):
         """Parse the tokens into an AST."""
@@ -235,6 +236,7 @@ class Parser:
         self.expect('KEYWORD')  # Expect 'while'
         condition = self.condition()
         print(f"While condition: {condition}")
+        self.expect('COLON')  # Expect ':' instead of 'then'
         body = self.block()
         print(f"While body: {body}")
         return WhileNode(condition, body)
@@ -261,13 +263,13 @@ class Parser:
         self.expect('KEYWORD')  # Expect 'if'
         condition = self.condition()
         print(f"If condition: {condition}")
-        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'then':
-            self.advance()  # Skip 'then' keyword
+        self.expect('COLON')  # Expect ':' instead of 'then'
         true_branch = self.block()
         print(f"If true branch: {true_branch}")
         false_branch = None
         if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'else':
-            self.advance()  # Skip 'else' keyword
+            self.advance()
+            self.expect('COLON')  # Expect ':' after 'else' as well
             false_branch = self.block()
             print(f"If false branch: {false_branch}")
         return IfNode(condition, true_branch, false_branch)
@@ -287,6 +289,8 @@ class Parser:
             stmt = self.statement()
             if stmt:
                 statements.append(stmt)
+            while self.current_token and self.current_token.type == 'NEWLINE':
+                self.advance()
         return statements
 
     def expression(self):
@@ -321,12 +325,16 @@ class Parser:
         """Parse a term (numbers, variables, and strings)."""
         while self.current_token and self.current_token.type == 'NEWLINE' or self.current_token and self.current_token.type == 'COMMENT':
             self.advance()
-
+        if self.current_token is None:
+            raise SyntaxError("Unexpected end of input")
         token = self.current_token
 
         if token.type == 'NUMBER':
             self.advance()
             return NumberNode(token.value)
+        elif token.type == 'COLON':
+            self.advance()
+
         elif token.type == 'ID':
             var_name = token.value
             self.advance()
@@ -346,6 +354,8 @@ class Parser:
             return expr
         elif token.type == 'LOGICAL':
             return self.logical_expression()
+        elif token.type == 'PRINT':
+            return self.print_statement()
         elif token.type == 'CMP':
             return self.comparison_expression()
         elif token.type == 'BRACKET' and token.value == '[':
@@ -552,6 +562,8 @@ class IntermediateCodeGenerator:
             return self.generate_binop(node)
         elif isinstance(node, NumberNode):
             return str(node.value)
+        elif isinstance(node, StringNode):
+            return f'"{node.value}"'  # Add this line to handle StringNode
         elif isinstance(node, PrintNode):
             self.generate_print(node)
         elif isinstance(node, IfNode):
@@ -636,14 +648,14 @@ x = 5
 y = 10
 
 # Test while loop
-while x < 10 then
+while x < 10:
     print x
     x = x + 1
 
 # Test if-else
-if y > 5 then
+if y > 5:
     print "y is greater than 5"
-else
+else:
     print "y is not greater than 5"
 
 # Test arithmetic

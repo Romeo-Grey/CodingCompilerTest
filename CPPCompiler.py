@@ -179,8 +179,9 @@ class Parser:
             self.advance()
             return token
         else:
-            raise SyntaxError(
-                f"Expected {token_type}, got {self.current_token.type if self.current_token else 'EOF'} at position {self.current_token.position if self.current_token else 'unknown'}")
+            raise CompilerError(
+                f"Expected {token_type}, got {self.current_token.type if self.current_token else 'EOF'}",
+                self.current_token.position if self.current_token else -1)
 
     def parse(self):
         """Parse the tokens into an AST."""
@@ -325,8 +326,11 @@ class Parser:
         """Parse a term (numbers, variables, and strings)."""
         while self.current_token and self.current_token.type == 'NEWLINE' or self.current_token and self.current_token.type == 'COMMENT':
             self.advance()
-        if self.current_token is None:
-            raise SyntaxError("Unexpected end of input")
+
+        def term(self):
+            if self.current_token is None:
+                raise CompilerError("Unexpected end of input", -1)
+
         token = self.current_token
 
         if token.type == 'NUMBER':
@@ -454,7 +458,8 @@ class SemanticAnalyzer:
             left_type = self.get_expression_type(expr.left)
             right_type = self.get_expression_type(expr.right)
             if left_type != right_type:
-                raise Exception(f"Type mismatch in binary operation: {left_type} {expr.op} {right_type}")
+                raise CompilerError(f"Type mismatch in binary operation: {left_type} {expr.op} {right_type}",
+                                    node.position)
             self.variables[var_name] = left_type
             print(f"Assigning binary operation result to variable '{var_name}'")
         else:
@@ -643,6 +648,57 @@ class IntermediateCodeGenerator:
         return "\n".join(self.instructions)
 
 
+class CompilerError(Exception):
+    def __init__(self, message, position):
+        self.message = message
+        self.position = position
+
+    def __str__(self):
+        return f"CompilerError at position {self.position}: {self.message}"
+
+
+class CppCodeGenerator:
+    def __init__(self, intermediate_code):
+        self.intermediate_code = intermediate_code.split('\n')
+        self.cpp_code = []
+        self.label_map = {}
+
+    def generate(self):
+        self.cpp_code.append("#include <iostream>")
+        self.cpp_code.append("int main() {")
+
+        for line in self.intermediate_code:
+            if line.strip():
+                self.process_line(line.strip())
+
+        self.cpp_code.append("    return 0;")
+        self.cpp_code.append("}")
+
+        return '\n'.join(self.cpp_code)
+
+    def process_line(self, line):
+        if line.startswith('STORE'):
+            _, value, var = line.split()
+            self.cpp_code.append(f"    int {var} = {value};")
+        elif line.startswith('PRINT'):
+            _, value = line.split(maxsplit=1)
+            self.cpp_code.append(f'    std::cout << {value} << std::endl;')
+        elif line.startswith('L'):
+            label = line.rstrip(':')
+            self.cpp_code.append(f"{label}:")
+        elif line.startswith('GOTO'):
+            _, label = line.split()
+            self.cpp_code.append(f"    goto {label};")
+        elif line.startswith('IF'):
+            parts = line.split()
+            condition = ' '.join(parts[1:-2])
+            label = parts[-1]
+            self.cpp_code.append(f"    if ({condition}) goto {label};")
+        else:
+            # Handle other intermediate code instructions
+            self.cpp_code.append(f"    // TODO: {line}")
+
+
 code = """
 x = 5
 y = 10
@@ -663,27 +719,42 @@ z = x + y
 print z
 
 """
+try:
+    # Step 1: Tokenize the input code
+    tokens = tokenize(code)
 
-# Step 1: Tokenize the input code
-tokens = tokenize(code)
+    # Check if tokens are generated correctly
+    print("Tokens:", tokens)
 
-# Check if tokens are generated correctly
-print("Tokens:", tokens)
+    # Step 2: Parse the tokens into an AST
+    parser = Parser(tokens)  # Ensure your Parser class is defined and works with tokens
+    ast = parser.parse()  # This should return the AST, which is stored in `ast`
 
-# Step 2: Parse the tokens into an AST
-parser = Parser(tokens)  # Ensure your Parser class is defined and works with tokens
-ast = parser.parse()  # This should return the AST, which is stored in `ast`
+    # Check if the AST is generated correctly
+    print("\nGenerated AST:")
+    for node in ast:
+        print(node)
 
-# Check if the AST is generated correctly
-print("\nGenerated AST:")
-for node in ast:
-    print(node)
+    # Step 3: Generate intermediate code from the AST
+    ir_gen = IntermediateCodeGenerator()
+    for node in ast:
+        ir_gen.generate(node)
 
-# Step 3: Generate intermediate code from the AST
-ir_gen = IntermediateCodeGenerator()
-for node in ast:
-    ir_gen.generate(node)
+    # Step 4: Print the intermediate code
+    print("\nIntermediate Code:")
+    print(ir_gen.get_code())
+    # Step 5:
+    ir_code = ir_gen.get_code()
+    cpp_generator = CppCodeGenerator(ir_code)
 
-# Step 4: Print the intermediate code
-print("\nIntermediate Code:")
-print(ir_gen.get_code())
+    cpp_code = cpp_generator.generate()
+
+    with open("CPPFile.cpp", 'a') as File:
+        File.writelines(cpp_code)
+        print(cpp_code)
+
+
+except CompilerError as e:
+    print(f"Compilation error: {e}")
+except Exception as e:
+    print(f"Unexpected error: {e}")
